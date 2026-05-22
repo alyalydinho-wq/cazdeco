@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product, Category, CartItem, Order, User } from '../types';
 import { mockProducts, mockCategories } from '../data/mockData';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { db, isFirebaseConfigured, mapFirestoreDocToProduct } from '../lib/firebase';
 import { collection, onSnapshot, setDoc, doc, deleteDoc } from 'firebase/firestore';
 
 interface AppState {
@@ -245,16 +245,25 @@ export const useStore = create<AppState>()(
       }),
       
       initializeFirebaseSync: () => {
-        if (!isFirebaseConfigured) return;
+        console.log("initializeFirebaseSync was called. isFirebaseConfigured:", isFirebaseConfigured);
+        if (!isFirebaseConfigured) {
+          console.warn("Firebase is not configured. Falling back to mock data / localStorage.");
+          return;
+        }
         
         // Listen to products
+        console.log("Subscribing to Firestore products collection...");
         onSnapshot(collection(db, "products"), (snapshot) => {
-          const products = snapshot.docs.map(doc => doc.data() as Product);
+          console.log(`Firestore products snapshot received. Document count: ${snapshot.docs.length}`);
+          const products = snapshot.docs.map(doc => mapFirestoreDocToProduct(doc.id, doc.data()));
+          console.log("Mapped products from Firestore:", products);
           if (products.length > 0) {
             set({ products });
+          } else {
+            console.warn("Firestore products collection is empty.");
           }
         }, (error) => {
-          console.error("Firebase products sync error:", error);
+          console.error("Firebase products sync error in Zustand store:", error);
         });
 
         // Listen to categories

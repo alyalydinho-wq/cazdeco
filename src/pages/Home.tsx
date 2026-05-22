@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Truck, ShieldCheck, CreditCard, HeadphonesIcon, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { db, isFirebaseConfigured, mapFirestoreDocToProduct } from '../lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Product } from '../types';
 
@@ -11,13 +11,22 @@ export default function Home() {
   const [dbProducts, setDbProducts] = useState<Product[] | null>(null);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) return;
+    console.log("Home Page: checking Firebase config. Status:", isFirebaseConfigured);
+    if (!isFirebaseConfigured) {
+      console.warn("Home Page: Firebase is not configured, using store backup.");
+      return;
+    }
+    
+    console.log("Home Page: Subscribing to Firestore products collection...");
     const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
-      const prods = snapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id || doc.data().id
-      } as Product));
-      setDbProducts(prods);
+      console.log(`Home Page: snapshot received with ${snapshot.docs.length} products`);
+      try {
+        const prods = snapshot.docs.map(doc => mapFirestoreDocToProduct(doc.id, doc.data()));
+        console.log("Home Page: mapped products successfully:", prods);
+        setDbProducts(prods);
+      } catch (err) {
+        console.error("Home Page: Error mapping products from snapshot:", err);
+      }
     }, (error) => {
       console.error("Firestore products real-time load failed for Home page:", error);
     });

@@ -7,24 +7,21 @@ import { Product } from '../types';
 
 // Remplissez ces informations après avoir créé votre projet sur console.firebase.google.com
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "VOTRE_API_KEY",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "VOTRE_PROJET.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "VOTRE_PROJET",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "VOTRE_PROJET.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "SENDER_ID",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "APP_ID"
+  apiKey: "AIzaSyDSW0RQAPwknDThvx7tiuDxrwivg_JyvP8",
+  authDomain: "cazdeco-dc371.firebaseapp.com",
+  projectId: "cazdeco-dc371",
+  storageBucket: "cazdeco-dc371.firebasestorage.app",
+  messagingSenderId: "1075313750668",
+  appId: "1:1075313750668:web:8dd8bc344c5982e3aa81a9"
 };
 
 // Toggle manually to false if using the app without Firebase
-export const isFirebaseConfigured = 
-  firebaseConfig.apiKey !== '' && 
-  firebaseConfig.apiKey !== 'VOTRE_API_KEY' && 
-  firebaseConfig.apiKey !== undefined;
+export const isFirebaseConfigured = true;
 
 console.log('--- DEBUG FIREBASE INITIALIZATION ---');
 console.log('Firebase Configured Status:', isFirebaseConfigured);
 console.log('Project ID:', firebaseConfig.projectId);
-console.log('API Key configured (boolean):', !!firebaseConfig.apiKey && firebaseConfig.apiKey !== 'VOTRE_API_KEY');
+console.log('API Key configured (boolean):', !!firebaseConfig.apiKey);
 console.log('Auth Domain:', firebaseConfig.authDomain);
 console.log('------------------------------------');
 

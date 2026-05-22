@@ -4,12 +4,31 @@ import { useStore } from '../store';
 import { Product } from '../types';
 import { ShoppingCart, Truck, Shield, Ruler, Calculator as CalcIcon, X } from 'lucide-react';
 import CarrelageCalculator from '../components/CarrelageCalculator';
+import { db, isFirebaseConfigured } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const products = useStore(state => state.products);
+  const [dbProducts, setDbProducts] = useState<Product[] | null>(null);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+      const prods = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id || doc.data().id
+      } as Product));
+      setDbProducts(prods);
+    }, (error) => {
+      console.error("Firestore products real-time load failed for ProductDetail page:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const storeProducts = useStore(state => state.products);
+  const products = dbProducts !== null ? dbProducts : storeProducts;
   const product = products.find(p => String(p.id) === String(id));
   
   const addToCart = useStore(state => state.addToCart);

@@ -3,9 +3,29 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Truck, ShieldCheck, CreditCard, HeadphonesIcon, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
+import { db, isFirebaseConfigured } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { Product } from '../types';
 
 export default function Home() {
-  const products = useStore(state => state.products);
+  const [dbProducts, setDbProducts] = useState<Product[] | null>(null);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+      const prods = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id || doc.data().id
+      } as Product));
+      setDbProducts(prods);
+    }, (error) => {
+      console.error("Firestore products real-time load failed for Home page:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const storeProducts = useStore(state => state.products);
+  const products = dbProducts !== null ? dbProducts : storeProducts;
   const categories = useStore(state => state.categories);
   const settings = useStore(state => state.settings);
   const scrollRef = useRef<HTMLDivElement>(null);

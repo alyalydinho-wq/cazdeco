@@ -3,6 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
+import { db, isFirebaseConfigured } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { Product } from '../types';
 
 const mobilierSubcategories = [
   { id: '1', name: 'Canapés', slug: 'canapes', icon: '🛋️' },
@@ -166,7 +169,24 @@ export default function Boutique() {
     heroSubtitle = "Trouvez les meilleurs articles correspondant à votre recherche.";
   }
 
-  const products = useStore(state => state.products);
+  const [dbProducts, setDbProducts] = useState<Product[] | null>(null);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+      const prods = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id || doc.data().id
+      } as Product));
+      setDbProducts(prods);
+    }, (error) => {
+      console.error("Firestore products real-time load failed for Boutique page:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const storeProducts = useStore(state => state.products);
+  const products = dbProducts !== null ? dbProducts : storeProducts;
   const categories = useStore(state => state.categories);
 
   const activeCategory = useMemo(() => {

@@ -22,6 +22,13 @@ const carrelageSubcategories = [
   { id: '2', name: 'CARRELAGE MURS', slug: 'carrelage-murs', icon: '🔳' },
 ];
 
+const sanitairesSubcategories = [
+  { id: '1', name: 'Salles de bains', slug: 'salles-de-bains', icon: '🛁' },
+  { id: '2', name: 'Lavabos', slug: 'lavabos', icon: '🚰' },
+  { id: '3', name: 'WC', slug: 'wc', icon: '🚽' },
+  { id: '4', name: 'Éviers', slug: 'eviers', icon: '🧼' },
+];
+
 export default function AdminProducts() {
   const products = useStore(state => state.products);
   const categories = useStore(state => state.categories);
@@ -49,6 +56,7 @@ export default function AdminProducts() {
     sku: '',
     originalPrice: undefined,
     badge: undefined,
+    badges: [],
     isBestSeller: false,
   });
 
@@ -66,6 +74,7 @@ export default function AdminProducts() {
       sku: 'SKU-' + Math.floor(Math.random() * 1000000),
       originalPrice: undefined,
       badge: undefined,
+      badges: [],
       isBestSeller: false,
     });
     setIsModalOpen(true);
@@ -126,6 +135,11 @@ export default function AdminProducts() {
       return cat?.slug === 'carrelage' || formData.categoryId === '5';
     })();
 
+    const isSanitairesSelected = (() => {
+      const cat = categories.find(c => c.id === formData.categoryId);
+      return cat?.slug === 'sanitaires' || formData.categoryId === '1';
+    })();
+
     if (isMobilierSelected && !formData.subcategory) {
       alert("Veuillez sélectionner une sous-catégorie pour le mobilier.");
       return;
@@ -136,11 +150,16 @@ export default function AdminProducts() {
       return;
     }
 
+    if (isSanitairesSelected && !formData.subcategory) {
+      alert("Veuillez sélectionner une sous-catégorie pour le sanitaire.");
+      return;
+    }
+
     // Filter out empty image URLs
     const finalImages = (formData.images || []).filter(img => img.trim() !== '');
     const finalData: any = { ...formData, images: finalImages.length > 0 ? finalImages : ['/placeholder.jpg'] };
 
-    if (!isMobilierSelected && !isCarrelageSelected) {
+    if (!isMobilierSelected && !isCarrelageSelected && !isSanitairesSelected) {
       delete finalData.subcategory;
     }
 
@@ -354,7 +373,8 @@ export default function AdminProducts() {
                     {product.subcategory && (() => {
                       const mobSub = mobilierSubcategories.find(sub => sub.slug === product.subcategory);
                       const carrSub = carrelageSubcategories.find(sub => sub.slug === product.subcategory);
-                      const activeSub = mobSub || carrSub;
+                      const sanSub = sanitairesSubcategories.find(sub => sub.slug === product.subcategory);
+                      const activeSub = mobSub || carrSub || sanSub;
                       return activeSub ? (
                         <div className="text-xs text-[#E63329] font-medium mt-0.5 flex items-center gap-1">
                           <span>{activeSub.icon}</span>
@@ -548,18 +568,48 @@ export default function AdminProducts() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">Badge</label>
-                      <select 
-                        value={formData.badge || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, badge: e.target.value as any || undefined }))}
-                        className="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:border-[#E63329] focus:outline-none"
-                      >
-                        <option value="">Aucun</option>
-                        <option value="Coups de cœur">Coup de cœur</option>
-                        <option value="Best-seller">Best-seller</option>
-                        <option value="Nouveauté">Nouveauté</option>
-                        <option value="Promo">Promotion</option>
-                      </select>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Badges du produit</label>
+                      <div className="grid grid-cols-2 gap-2 bg-[#0c1222] border border-slate-800 p-3 rounded-lg">
+                        {[
+                          { value: 'Coups de cœur', label: 'Coup de cœur' },
+                          { value: 'Best-seller', label: 'Best-seller' },
+                          { value: 'Nouveauté', label: 'Nouveauté' },
+                          { value: 'Promo', label: 'Promotion' },
+                          { value: 'Exclusif', label: 'Exclusif' }
+                        ].map((option) => {
+                          const currentBadges = formData.badges || (formData.badge ? [formData.badge] : []);
+                          const isChecked = currentBadges.includes(option.value);
+                          
+                          const handleToggleBadge = (checked: boolean) => {
+                            let newBadges = [...currentBadges];
+                            if (checked) {
+                              if (!newBadges.includes(option.value)) {
+                                newBadges.push(option.value);
+                              }
+                            } else {
+                              newBadges = newBadges.filter(b => b !== option.value);
+                            }
+                            
+                            setFormData(prev => ({
+                              ...prev,
+                              badges: newBadges,
+                              badge: newBadges[0] as any || undefined
+                            }));
+                          };
+
+                          return (
+                            <label key={option.value} className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-800/50 rounded cursor-pointer transition-colors text-slate-300">
+                              <input 
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => handleToggleBadge(e.target.checked)}
+                                className="w-4 h-4 rounded bg-[#0f172a] border-slate-700 text-[#E63329] focus:ring-[#E63329]"
+                              />
+                              <span className="text-xs">{option.label}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -609,6 +659,33 @@ export default function AdminProducts() {
                           >
                             <option value="">Sélectionner une sous-catégorie</option>
                             {mobilierSubcategories.map(sub => (
+                              <option key={sub.slug} value={sub.slug}>
+                                {sub.icon} {sub.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Conditional Sanitaires Subcategories */}
+                    {(() => {
+                      const selectedCat = categories.find(c => c.id === formData.categoryId);
+                      const isSanitaires = selectedCat?.slug === 'sanitaires' || formData.categoryId === '1';
+                      if (!isSanitaires) return null;
+                      return (
+                        <div className="space-y-1 animate-in fade-in duration-300">
+                          <label className="block text-sm font-medium text-slate-300 mb-1">
+                            Sous-catégorie Sanitaires <span className="text-red-500">*</span>
+                          </label>
+                          <select 
+                            required
+                            value={formData.subcategory || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, subcategory: e.target.value }))}
+                            className="w-full bg-[#0f172a] border border-[#E63329]/60 rounded-lg px-4 py-2.5 text-white focus:border-[#E63329] focus:outline-none ring-1 ring-[#E63329]/20"
+                          >
+                            <option value="">Sélectionner une sous-catégorie</option>
+                            {sanitairesSubcategories.map(sub => (
                               <option key={sub.slug} value={sub.slug}>
                                 {sub.icon} {sub.name}
                               </option>

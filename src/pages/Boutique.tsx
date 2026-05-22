@@ -22,6 +22,13 @@ const carrelageSubcategories = [
   { id: '2', name: 'Carrelage Murs', slug: 'carrelage-murs', icon: '🔳' },
 ];
 
+export const sanitairesSubcategories = [
+  { id: '1', name: 'Salles de bains', slug: 'salles-de-bains', icon: '🛁' },
+  { id: '2', name: 'Lavabos', slug: 'lavabos', icon: '🚰' },
+  { id: '3', name: 'WC', slug: 'wc', icon: '🚽' },
+  { id: '4', name: 'Éviers', slug: 'eviers', icon: '🧼' },
+];
+
 export default function Boutique() {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [sortBy, setSortBy] = useState('newest'); // 'price_asc', 'price_desc', 'newest', 'popular'
@@ -326,6 +333,49 @@ export default function Boutique() {
                 </div>
               )}
 
+              {/* Sanitaires Subcategories (Left Side Sidebar Filter) */}
+              {activeCategorySlug === 'sanitaires' && (
+                <div className="bg-gray-50/60 rounded-xl border border-gray-100 p-5">
+                  <h3 className="font-heading text-xs mb-4 uppercase tracking-[0.2em] text-gray-850 border-b border-gray-200/60 pb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E63329]"></span>
+                    Sélection Sanitaires
+                  </h3>
+                  <ul className="space-y-1.5">
+                    <li>
+                      <Link 
+                        to={getSubcategoryLink(null)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs uppercase tracking-wider rounded-lg transition-all ${
+                          !activeSubcategorySlug 
+                            ? 'bg-[#E63329] text-white font-semibold shadow-md shadow-red-100/50' 
+                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                        }`}
+                      >
+                        <span className="text-base">🛁</span>
+                        <span>Tous les sanitaires</span>
+                      </Link>
+                    </li>
+                    {sanitairesSubcategories.map((sub) => {
+                      const isActive = activeSubcategorySlug === sub.slug;
+                      return (
+                        <li key={sub.slug}>
+                          <Link 
+                            to={getSubcategoryLink(sub.slug)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs uppercase tracking-wider rounded-lg transition-all ${
+                              isActive 
+                                ? 'bg-[#E63329] text-white font-semibold shadow-md shadow-red-100/50' 
+                                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                            }`}
+                          >
+                            <span className="text-base">{sub.icon}</span>
+                            <span>{sub.name}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
               {/* Category Links */}
               {!pathCategorySlug && (
                 <div>
@@ -478,6 +528,65 @@ export default function Boutique() {
                   </Link>
                   
                   {carrelageSubcategories.map((sub) => {
+                    const isActive = activeSubcategorySlug === sub.slug;
+                    return (
+                      <Link 
+                        key={sub.slug}
+                        to={getSubcategoryLink(sub.slug)}
+                        className={`flex-shrink-0 flex flex-col items-center justify-center w-36 h-24 rounded-2xl border transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-gradient-to-br from-[#E63329] to-[#bf241d] text-white border-[#E63329] shadow-lg shadow-red-100 scale-105 font-medium' 
+                            : 'bg-white text-gray-650 border-gray-100 hover:border-gray-200 hover:shadow-md'
+                        }`}
+                      >
+                        <span className="text-2xl mb-2">{sub.icon}</span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-center px-2 line-clamp-2 leading-tight">
+                          {sub.name}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Sanitaires Subcategories Top Banner */}
+            {activeCategorySlug === 'sanitaires' && (
+              <div className="mb-8 font-heading">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium text-xs uppercase tracking-[0.2em] text-[#E63329] flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E63329] animate-pulse"></span>
+                    Nos Collections Sanitaires
+                  </h3>
+                  {activeSubcategorySlug && (
+                    <Link 
+                      to={getSubcategoryLink(null)}
+                      className="text-xs text-gray-500 hover:text-gray-950 transition flex items-center gap-1 font-medium hover:underline"
+                    >
+                      Effacer le filtre &times;
+                    </Link>
+                  )}
+                </div>
+                
+                {/* Horizontal scroll container with hidden scrollbar */}
+                <div 
+                  className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {/* Tout voir Card */}
+                  <Link 
+                    to={getSubcategoryLink(null)}
+                    className={`flex-shrink-0 flex flex-col items-center justify-center w-36 h-24 rounded-2xl border transition-all duration-300 ${
+                      !activeSubcategorySlug 
+                        ? 'bg-gradient-to-br from-[#E63329] to-[#bf241d] text-white border-[#E63329] shadow-lg shadow-red-100 scale-105' 
+                        : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200 hover:shadow-md'
+                    }`}
+                  >
+                    <span className="text-2xl mb-2">🛁</span>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-center px-1">Tout voir</span>
+                  </Link>
+                  
+                  {sanitairesSubcategories.map((sub) => {
                     const isActive = activeSubcategorySlug === sub.slug;
                     return (
                       <Link 

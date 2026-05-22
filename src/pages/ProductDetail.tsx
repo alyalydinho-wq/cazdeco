@@ -106,15 +106,27 @@ export default function ProductDetail() {
 
           {/* Details */}
           <div className="lg:w-1/2 flex flex-col">
-            {(product.status === 'outofstock' || product.stock === 0) ? (
-              <span className="inline-block bg-red-600 text-white text-xs font-bold uppercase px-3 py-1 rounded w-fit mb-4 select-none animate-pulse">
-                En rupture de stock
-              </span>
-            ) : product.badge ? (
-              <span className="inline-block bg-caz-red text-white text-xs font-bold uppercase px-3 py-1 rounded w-fit mb-4">
-                {product.badge}
-              </span>
-            ) : null}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(product.status === 'outofstock' || product.stock === 0) ? (
+                <span className="inline-block bg-red-600 text-white text-xs font-bold uppercase px-3 py-1 rounded animate-pulse">
+                  En rupture de stock
+                </span>
+              ) : (
+                (() => {
+                  const bList = product.badges && product.badges.length > 0 
+                    ? product.badges 
+                    : (product.badge ? [product.badge] : []);
+                  return bList.map((bg, idx) => (
+                    <span key={idx} className={`inline-block text-white text-xs font-bold uppercase px-3 py-1 rounded ${
+                      bg === 'Promo' || bg === 'Coups de cœur' ? 'bg-[#9B120B]' : 
+                      bg === 'Nouveauté' ? 'bg-gray-800' : 'bg-caz-gold'
+                    }`}>
+                      {bg}
+                    </span>
+                  ));
+                })()
+              )}
+            </div>
             
             <h1 className="font-satoshi font-bold text-3xl md:text-4xl text-caz-gray-dark mb-2">{product.name}</h1>
             <p className="text-sm text-gray-500 mb-6">Réf: {product.sku}</p>

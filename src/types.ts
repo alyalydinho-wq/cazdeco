@@ -8,6 +8,7 @@ export interface Product {
   stock: number;
   status: 'active' | 'inactive' | 'outofstock';
   badge?: 'Nouveauté' | 'Promo' | 'Best-seller' | 'Coups de cœur' | 'Exclusif' | '';
+  badges?: string[];
   isBestSeller?: boolean;
   images: string[];
   sku: string;

@@ -24,18 +24,27 @@ export default function ProductCard({ product }: ProductCardProps) {
         </Link>
         
         {/* Badges */}
-        {(product.status === 'outofstock' || product.stock === 0) ? (
-          <span className="absolute top-2 left-2 text-white text-[10px] font-bold px-2.5 py-1 bg-red-600 uppercase tracking-widest z-10 rounded-sm">
-            En rupture
-          </span>
-        ) : product.badge ? (
-          <span className={`absolute top-2 left-2 text-white text-[10px] font-medium px-2.5 py-1 uppercase tracking-wider ${
-            product.badge === 'Promo' || product.badge === 'Coups de cœur' ? 'bg-[#9B120B]' : 
-            product.badge === 'Nouveauté' ? 'bg-gray-800' : 'bg-caz-gold'
-          }`}>
-            {product.badge === 'Promo' && product.oldPrice ? `-${Math.round((1 - product.price / product.oldPrice) * 100)}%` : product.badge}
-          </span>
-        ) : null}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start z-10">
+          {(product.status === 'outofstock' || product.stock === 0) ? (
+            <span className="text-white text-[10px] font-bold px-2.5 py-1 bg-red-600 uppercase tracking-widest rounded-sm">
+              En rupture
+            </span>
+          ) : (
+            (() => {
+              const bList = product.badges && product.badges.length > 0 
+                ? product.badges 
+                : (product.badge ? [product.badge] : []);
+              return bList.map((bg, idx) => (
+                <span key={idx} className={`text-white text-[10px] font-medium px-2.5 py-1 uppercase tracking-wider ${
+                  bg === 'Promo' || bg === 'Coups de cœur' ? 'bg-[#9B120B]' : 
+                  bg === 'Nouveauté' ? 'bg-gray-800' : 'bg-caz-gold'
+                }`}>
+                  {bg === 'Promo' && product.oldPrice ? `-${Math.round((1 - product.price / product.oldPrice) * 100)}%` : bg}
+                </span>
+              ));
+            })()
+          )}
+        </div>
         
         {/* Quick actions overlay */}
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
